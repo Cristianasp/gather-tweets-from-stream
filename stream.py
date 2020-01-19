@@ -61,7 +61,58 @@ class StreamListener(tweepy.StreamListener):
             timeTweet = status.created_at
             source = status.source
             tweetId = status.id
-            tweetUrl = "https://twitter.com/statuses/" + str(tweetId)
+            tweetUrl = # We need to implement StreamListener to use Tweepy to listen to Twitter
+class StreamListener(tweepy.StreamListener):
+
+    def on_status(self, status):
+
+        try:
+            # saves the tweet object
+            tweet_object = status
+
+            # Checks if its a extended tweet (>140 characters)
+            if 'extended_tweet' in tweet_object._json:
+                tweet = tweet_object.extended_tweet['full_text']
+            else:
+                tweet = tweet_object.text
+
+            '''Convert all named and numeric character references
+            (e.g. &gt;, &#62;, &#x3e;) in the string s to the
+            corresponding Unicode characters'''
+            tweet = (tweet.replace('&amp;', '&').replace('&lt;', '<')
+                     .replace('&gt;', '>').replace('&quot;', '"')
+                     .replace('&#39;', "'").replace(';', " ")
+                     .replace(r'\u', " "))
+
+            # Save the keyword that matches the stream
+            keyword_matches = []
+            for word in keywords:
+                if word.lower() in tweet.lower():
+                    keyword_matches.extend([word])
+
+            keywords_strings = ", ".join(str(x) for x in keyword_matches)
+
+            # Save other information from the tweet
+            user = status.author.screen_name
+            timeTweet = status.created_at
+            source = status.source
+            tweetId = status.id
+            tweetUrl = "https://twitter.com/" +str(user) + "/status/" + str(tweetId)
+
+            # Exclude retweets, too many mentions and too many hashtags
+            if not any((('RT @' in tweet, 'RT' in tweet,
+                       tweet.count('@') >= 2, tweet.count('#') >= 3))):
+
+                # Saves the tweet information in a new row of the CSV file
+                writer.writerow([tweet, keywords_strings, timeTweet,
+                                user, source, tweetId, tweetUrl])
+                #writer.writerow([sub.encode("utf-8")  if isinstance(sub, basestring) else sub for sub in rowPrinter[x]])
+
+
+        except Exception as e:
+            print('Encountered Exception:', e)
+            pass
+            
 
             # Exclude retweets, too many mentions and too many hashtags
             if not any((('RT @' in tweet, 'RT' in tweet,
