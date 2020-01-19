@@ -61,7 +61,7 @@ class StreamListener(tweepy.StreamListener):
             timeTweet = status.created_at
             source = status.source
             tweetId = status.id
-            tweetUrl = "https://twitter.com/statuses/" + str(tweetId)
+            tweetUrl = "https://twitter.com/" + str(user) + "/status/" + str(tweetId)
 
             # Exclude retweets, too many mentions and too many hashtags
             if not any((('RT @' in tweet, 'RT' in tweet,
